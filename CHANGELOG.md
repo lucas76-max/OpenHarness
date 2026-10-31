@@ -26,6 +26,34 @@
 - Fixed the assistant answer appearing twice: the accumulated stream was never cleared and was rendered on top of the persisted message. The in-flight answer is now a single bubble that grows during streaming, then becomes the persisted message.
 - Stream handling moved to refs so event handlers always target the active conversation; the realtime subscription is established once instead of on every conversation switch.
 
+## 0.3.3 - Scroll corrigé, outils plus tolérants
+
+- **Scroll réparé** : en fenêtre agrandie, le tchat d'équipe était clippé sans ascenseur (ligne de grille implicite qui s'étirait). Les rangées de la grille sont clampées (`minmax(0, 1fr)`) et le chat solo retrouve son auto-scroll (le ref de scroll pointe désormais sur un élément avec une boîte, pas un `display: contents`).
+- **Chemins plus tolérants** : `..` est accepté tant que la cible résolue reste dans le dossier assigné (vérification lexicale + realpath). Les décorations autour des chemins (backticks, guillemets, puces markdown, gras) sont ignorées ; les marqueurs d'action enrobés dans du markdown (`- **WRITE**: \`fichier\` | contenu`) sont reconnus et dédoublonnés.
+- **RUN plus tolérant** : commandes jusqu'à 2000 caractères (au lieu de 512), guillemets autorisés autour des chemins de fichiers (les quotes restent de la syntaxe shell, pas une infraction), `RUN` possible même quand la mission n'a aucun dossier assigné (programme du PATH), programmes relatifs `./outils/x.bat` résolus depuis le dossier de travail du RUN, et fin de phrase décorative tolérée (`RUN: node --version.`).
+
+## 0.3.2 - Live agent activity
+
+- The interface now shows what agents are doing in real time: a pulsing badge (`Alpha réfléchit…`, `Alpha lit les dossiers…`, `écrit un fichier…`, `crée un dossier…`, `supprime…`, `lance une application…`) attached to the streaming bubble in team chat, and a placeholder while the first agent warms up.
+- Missions display the same badge next to the running status, fed by a dedicated `agent:activity` event (conversation id, mission id, agent id, state) emitted by the shared turn engine; `idle` clears the badge. The main process allowlist also gates emitted channels now, not just invoked ones.
+
+## 0.3.1 - Team chat
+
+- New shared team conversation: every agent of the roster answers in the same persisted thread, in order, each one seeing what the user and the previous agents said. The thread streams live in the interface, each bubble carries the name and icon of the agent that produced it, and the mention selector targets one agent instead of the whole team.
+- Team threads appear in the sidebar history (distinct icon) and reopen with their full content. Team conversations are real rows in the database (`conversations.team_id`, `messages.agent_id`); the solo chat flow is untouched.
+- Agents keep their folder capabilities during the chat: `READ`, `WRITE`, `MKDIR`, `DELETE` and `RUN`/`RUN_WAIT` are executed by the main process within the same rules as missions, and the internal tool-result messages are stored for the model but hidden from the thread.
+- The turn engine (`runAgentTurn`) and the workspace instructions (`buildWorkspaceContext`) are now shared between missions and team chat; missions keep their own sequential hand-off view.
+- Tests: team chat E2E suite (roster order, shared history, attribution of each bubble, READ cycle during a chat, refusal of `teamchat:send` on a solo conversation).
+
+## 0.3.0 - Team workspace write access and application launching
+
+- Folders assigned to a team can now be marked "Écriture" in Settings → Équipes; flagged entries are stored as `path [WRITABLE]` and decoded by `shared/workspace-flags.ts` (single source of truth for main process and renderer).
+- During missions, agents can now emit full-line action markers: `WRITE: chemin | contenu` (512 KB max, 2 MB per turn, `\n`/`\t` escapes supported), `MKDIR: chemin` and `DELETE: chemin` (file or empty folder only) in folders flagged writable, and `RUN:` / `RUN_WAIT:` to launch applications when the new team-level toggle "Autoriser le lancement d'applications" is on.
+- RUN resolves bare program names on the PATH or paths inside the assigned folders, passes arguments without shell interpolation, captures a bounded output snapshot, and `RUN_WAIT` reports the exit code (120 s max); arguments that look like out-of-root paths are refused.
+- Write targets are anchored on their deepest existing ancestor, so a symlinked parent directory cannot smuggle a path out of the writable root; DELETE refuses the folder root and never recurses.
+- The team view and mission context show per-folder capability flags; results come back to the agent as tagged tool lines (`FILE_CONTENT`, `WRITE_RESULT`, `MKDIR_RESULT`, `DELETE_RESULT`, `RUN_RESULT`) within the same turn (3 rounds, 6 actions per round).
+- Tests: parsing of the new markers, write/delete/mkdir confinement (traversal, symlinks, read-only folders), RUN program/argument confinement and E2E missions covering write+mkdir, refusals without permissions, and an allowed RUN_WAIT execution.
+
 ## 0.2.1 - Assisted installer and interface language
 
 - The Windows setup is now a real assisted installer: language selection dialog at startup (French/English, English fallback), license page with provider/mission notices, installation mode page (per-user default, per-machine with elevation), and a changeable installation directory.

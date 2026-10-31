@@ -7,6 +7,7 @@ const fr: Dict = {
   'side.newChat': 'Nouvelle conversation',
   'side.solo': 'Individuel',
   'side.team': 'Équipe',
+  'side.teamChat': 'Tchat d’équipe',
   'side.agents': 'Agents',
   'side.history': 'Historique',
   'side.noConversations': 'Aucune conversation',
@@ -35,6 +36,16 @@ const fr: Dict = {
   'chat.welcomeSub': 'Choisissez un agent, connectez un modèle, puis lancez la discussion.',
   'chat.loadError': 'Impossible de joindre le processus principal : {error}',
 
+  // Live agent activity
+  'act.queued': '{agent} attend son tour',
+  'act.thinking': '{agent} réfléchit…',
+  'act.reading': '{agent} lit les dossiers…',
+  'act.writing': '{agent} écrit un fichier…',
+  'act.creating': '{agent} crée un dossier…',
+  'act.deleting': '{agent} supprime…',
+  'act.running': '{agent} lance une application…',
+  'act.waiting': 'En attente du premier agent…',
+
   // Team view
   'team.eyebrow': 'MISSION MULTI-AGENTS',
   'team.title': 'Confiez un travail à votre équipe',
@@ -54,6 +65,15 @@ const fr: Dict = {
   'team.activity': 'Activité de l’équipe',
   'team.timelineEmpty': 'Les échanges de la mission apparaîtront ici, en temps réel.',
   'team.orchestrator': 'Orchestrateur',
+
+  // Team chat
+  'tchat.title': 'Tchat d’équipe',
+  'tchat.lede': 'Une conversation partagée : chaque agent répond dans le fil, avec l’historique et les dossiers de l’équipe.',
+  'tchat.placeholder': 'Écrire à l’équipe…',
+  'tchat.mention': 'Destinataire',
+  'tchat.everyone': 'Toute l’équipe',
+  'tchat.noTeams': 'Créez une équipe dans Paramètres pour discuter à plusieurs.',
+  'tchat.toolHint': 'Les agents peuvent lire et agir sur les dossiers de l’équipe (READ / WRITE / RUN) pendant la discussion.',
 
   // Settings
   'set.title': 'Paramètres',
@@ -81,7 +101,12 @@ const fr: Dict = {
   'set.teamName': 'Nom de l’équipe',
   'set.teamNamePlaceholder': 'Équipe développement',
   'set.participants': 'Agents participants',
-  'set.folders': 'Dossiers assignés (lecture seule pendant les missions)',
+  'set.folders': 'Dossiers assignés (lecture seule par défaut pendant les missions)',
+  'set.allowRun': 'Autoriser le lancement d’applications',
+  'set.allowRunSub': 'Les agents pourront lancer des applications (RUN / RUN_WAIT) pendant les missions.',
+  'set.writableOn': 'Écriture',
+  'set.writableOff': 'Lecture seule',
+  'set.writableHint': 'Cochez « Écriture » pour permettre aux agents de créer et modifier des fichiers dans ce dossier pendant les missions.',
   'set.assignFolder': 'Assigner un dossier',
   'set.addFolder': '+ Dossier',
   'set.removeFolder': 'Retirer ce dossier',
@@ -111,6 +136,7 @@ const en: Dict = {
   'side.newChat': 'New conversation',
   'side.solo': 'Individual',
   'side.team': 'Team',
+  'side.teamChat': 'Team chat',
   'side.agents': 'Agents',
   'side.history': 'History',
   'side.noConversations': 'No conversations yet',
@@ -138,6 +164,16 @@ const en: Dict = {
   'chat.welcomeSub': 'Pick an agent, connect a model, then start the conversation.',
   'chat.loadError': 'Cannot reach the main process: {error}',
 
+  // Live agent activity
+  'act.queued': '{agent} is waiting for its turn',
+  'act.thinking': '{agent} is thinking…',
+  'act.reading': '{agent} is reading the folders…',
+  'act.writing': '{agent} is writing a file…',
+  'act.creating': '{agent} is creating a folder…',
+  'act.deleting': '{agent} is deleting…',
+  'act.running': '{agent} is launching an application…',
+  'act.waiting': 'Waiting for the first agent…',
+
   'team.eyebrow': 'MULTI-AGENT MISSION',
   'team.title': 'Give your team some work',
   'team.lede': 'Every agent on the team is actually invoked, in order, with the previous results as context.',
@@ -156,6 +192,15 @@ const en: Dict = {
   'team.activity': 'Team activity',
   'team.timelineEmpty': 'Mission exchanges will appear here, in real time.',
   'team.orchestrator': 'Orchestrator',
+
+  // Team chat
+  'tchat.title': 'Team chat',
+  'tchat.lede': 'One shared thread: every agent answers in it, with the team history and folders.',
+  'tchat.placeholder': 'Write to the team…',
+  'tchat.mention': 'Recipient',
+  'tchat.everyone': 'Whole team',
+  'tchat.noTeams': 'Create a team in Settings to chat with several agents.',
+  'tchat.toolHint': 'Agents can read and act on the team folders (READ / WRITE / RUN) while chatting.',
 
   'set.title': 'Settings',
   'set.lede': 'Provider connections, teams and custom agents.',
@@ -182,7 +227,12 @@ const en: Dict = {
   'set.teamName': 'Team name',
   'set.teamNamePlaceholder': 'Development team',
   'set.participants': 'Participating agents',
-  'set.folders': 'Assigned folders (read-only during missions)',
+  'set.folders': 'Assigned folders (read-only by default during missions)',
+  'set.allowRun': 'Allow launching applications',
+  'set.allowRunSub': 'Agents will be able to launch applications (RUN / RUN_WAIT) during missions.',
+  'set.writableOn': 'Writable',
+  'set.writableOff': 'Read-only',
+  'set.writableHint': 'Check “Writable” to let agents create and modify files in this folder during missions.',
   'set.assignFolder': 'Assign a folder',
   'set.addFolder': '+ Folder',
   'set.removeFolder': 'Remove this folder',

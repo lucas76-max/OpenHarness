@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 import { PapIcon } from './icons';
 import { Team, WorkspaceListing, api } from './types';
+import { parseFolderFlags } from '../../shared/workspace-flags';
+import { ActivityBadge } from './TeamChatView';
+import type { Activity } from './hooks';
 import type { TFunction } from './i18n';
 
-export function TeamView({ teams, agents, missionRunning, events, setEvents, missionDone, missionId, t } : {
-  teams: Team[]; agents: any[]; missionRunning: boolean; events: any[]; setEvents: (fn: (prev: any[]) => any[]) => void; missionDone: string; missionId: string; t: TFunction;
+export function TeamView({ teams, agents, missionRunning, events, setEvents, missionDone, missionId, activities, t } : {
+  teams: Team[]; agents: any[]; missionRunning: boolean; events: any[]; setEvents: (fn: (prev: any[]) => any[]) => void; missionDone: string; missionId: string;
+  activities?: Record<string, { agentId?: string; activity: Activity }>; t: TFunction;
 }) {
   const [teamId, setTeamId] = useState('');
   const [task, setTask] = useState('');
@@ -12,7 +16,9 @@ export function TeamView({ teams, agents, missionRunning, events, setEvents, mis
   const [workspace, setWorkspace] = useState<WorkspaceListing[] | null>(null);
   const selectedTeam = teams.find(t => t.id === teamId) || teams[0];
   const roster: string[] = selectedTeam ? JSON.parse(selectedTeam.agent_ids) : [];
-  const folders: string[] = selectedTeam?.folders ? JSON.parse(selectedTeam.folders) : [];
+  const { folders, writable } = parseFolderFlags(
+    selectedTeam?.folders ? (JSON.parse(selectedTeam.folders) as string[]) : []
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -69,7 +75,9 @@ export function TeamView({ teams, agents, missionRunning, events, setEvents, mis
                   <div className="workspace-list">
                     {(workspace ?? []).map((l) => (
                       <div key={l.folder}>
-                        <span className="f">{l.folder}</span>
+                        <span className="f">
+                          {writable.has(l.folder) ? `[${t('set.writableOn')}] ` : ''}{l.folder}
+                        </span>
                         {l.entries.map((e) => e.name).join(' · ') || t('team.emptyFolder')}
                       </div>
                     ))}
@@ -90,6 +98,13 @@ export function TeamView({ teams, agents, missionRunning, events, setEvents, mis
                 {missionRunning ? (
                   <>
                     <span className="team-status"><span className="dot" /> {t('team.running')}</span>
+                    {activities && missionId && activities[missionId] && (
+                      <ActivityBadge
+                        activity={activities[missionId].activity}
+                        agent={agents.find((a: any) => a.id === activities[missionId].agentId)}
+                        t={t}
+                      />
+                    )}
                     <button className="btn btn-ghost" onClick={stop}>{t('team.stop')}</button>
                   </>
                 ) : (

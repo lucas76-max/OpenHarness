@@ -5,7 +5,7 @@ import type { TFunction } from './i18n';
 export function Sidebar({ data, agentId, conversationId, mode, onAgent, onNewChat, onOpenConversation, onDeleteConversation, onMode, onPage, onThemeToggle, light, connectionLabel, t } : {
   data: any; agentId: string; conversationId: string; mode: string;
   onAgent: (id: string) => void; onNewChat: () => void; onOpenConversation: (id: string) => void;
-  onDeleteConversation: (id: string) => void; onMode: (m: 'solo' | 'team') => void; onPage: (p: 'chat' | 'settings') => void;
+  onDeleteConversation: (id: string) => void; onMode: (m: 'solo' | 'team' | 'teamchat') => void; onPage: (p: 'chat' | 'settings') => void;
   onThemeToggle: () => void; light: boolean; connectionLabel: string; t: TFunction;
 }) {
   return (
@@ -27,6 +27,9 @@ export function Sidebar({ data, agentId, conversationId, mode, onAgent, onNewCha
       <div className="mode-switch">
         <button className={mode === 'solo' ? 'active' : ''} onClick={() => onMode('solo')}>
           <PapIcon name="chat" size={14} /> {t('side.solo')}
+        </button>
+        <button className={mode === 'teamchat' ? 'active' : ''} onClick={() => onMode('teamchat')}>
+          <PapIcon name="chat" size={14} /> {t('side.teamChat')}
         </button>
         <button className={mode === 'team' ? 'active' : ''} onClick={() => onMode('team')}>
           <PapIcon name="users" size={14} /> {t('side.team')}
@@ -54,12 +57,12 @@ export function Sidebar({ data, agentId, conversationId, mode, onAgent, onNewCha
         {data.conversations.slice(0, 30).map((c: Conversation) => (
           <button
             key={c.id}
-            className={`history-item ${conversationId === c.id ? 'active' : ''}`}
+            className={`history-item ${conversationId === c.id && mode !== 'teamchat' ? 'active' : ''}`}
             onClick={() => onOpenConversation(c.id)}
-            title={t('side.historyTitle')}
+            title={c.team_id ? t('side.teamChat') : t('side.historyTitle')}
             onContextMenu={(e) => { e.preventDefault(); onDeleteConversation(c.id); }}
           >
-            <PapIcon name="chat" size={12} />
+            <PapIcon name={c.team_id ? 'users' : 'chat'} size={12} />
             <span className="label">{c.title || t('side.newChat')}</span>
           </button>
         ))}
@@ -84,8 +87,14 @@ export function Sidebar({ data, agentId, conversationId, mode, onAgent, onNewCha
   );
 }
 
-export function Topbar({ agent, connection, page, t }: { agent?: Agent; connection?: Connection; page: string; t: TFunction }) {
-  const title = page === 'settings' ? t('top.settings') : page === 'team' ? t('top.team') : agent?.name || 'OpenHarness';
+export function Topbar({ agent, connection, page, mode, t }: { agent?: Agent; connection?: Connection; page: string; mode?: string; t: TFunction }) {
+  const title = page === 'settings'
+    ? t('top.settings')
+    : page === 'team'
+      ? t('top.team')
+      : mode === 'teamchat'
+        ? t('tchat.title')
+        : agent?.name || 'OpenHarness';
   return (
     <header className="topbar">
       <div className="topbar-title">
@@ -110,10 +119,12 @@ export function Topbar({ agent, connection, page, t }: { agent?: Agent; connecti
   );
 }
 
-export function ChatView({ agent, messages, streaming, busy, error, text, setText, onSend, onStop, connections, connectionId, onConnectionChange, hasConnections, t } : {
+export function ChatView({ agent, messages, streaming, busy, error, text, setText, onSend, onStop, connections, connectionId, onConnectionChange, hasConnections, scrollRef, t } : {
   agent?: Agent; messages: ChatMessage[]; streaming: string; busy: boolean; error: string;
   text: string; setText: (t: string) => void; onSend: () => void; onStop: () => void;
-  connections: Connection[]; connectionId: string; onConnectionChange: (id: string) => void; hasConnections: boolean; t: TFunction;
+  connections: Connection[]; connectionId: string; onConnectionChange: (id: string) => void; hasConnections: boolean;
+  scrollRef?: React.RefObject<HTMLElement>;
+  t: TFunction;
 }) {
   // The in-flight assistant answer is the streaming text itself, rendered as the
   // last bubble. No separate placeholder bubble and no extra streaming bubble:
@@ -124,7 +135,7 @@ export function ChatView({ agent, messages, streaming, busy, error, text, setTex
     : messages.filter((m) => !(m.role === 'assistant' && m.content === ''));
   const empty = !visible.length;
   return (
-    <section className="chat-view">
+    <section className="chat-view" ref={scrollRef}>
       <div className="messages">
         {empty ? (
           <Welcome t={t} />
