@@ -402,8 +402,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         missionJob = viewModelScope.launch {
             val record = { agentId: String, text: String ->
                 db.recordEvent(missionId, agentId, text)
-                _state.update {
-                    it.copy(missionEvents = it + io.openharness.mobile.data.MissionEvent(missionId, agentId, text))
+                _state.update { current ->
+                    current.copy(
+                        missionEvents = current.missionEvents +
+                            io.openharness.mobile.data.MissionEvent(missionId, agentId, text)
+                    )
                 }
             }
 

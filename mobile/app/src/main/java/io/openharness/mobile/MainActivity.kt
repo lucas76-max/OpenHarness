@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +70,7 @@ private fun HarnessApp(vm: AppViewModel = viewModel()) {
         val tokens = LocalTokens.current
         val drawer = rememberDrawerState(DrawerValue.Closed)
         val scope = rememberCoroutineScope()
+        val appContext = LocalContext.current
         var pendingFolders by remember { mutableStateOf(listOf<String>()) }
         var pendingTeamId by remember { mutableStateOf<String?>(null) }
 
@@ -77,7 +79,7 @@ private fun HarnessApp(vm: AppViewModel = viewModel()) {
         ) { uri: Uri? ->
             if (uri != null) {
                 runCatching {
-                    contentResolver.takePersistableUriPermission(
+                    appContext.contentResolver.takePersistableUriPermission(
                         uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
                 }
